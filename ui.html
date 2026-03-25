@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --figma-bg: var(--figma-color-bg, #ffffff);
+      --figma-text: var(--figma-color-text, #333333);
+      --figma-border: var(--figma-color-border, #e5e5e5);
+      --figma-bg-secondary: var(--figma-color-bg-secondary, #f3f4f6);
+    }
+    body {
+      background-color: var(--figma-bg);
+      color: var(--figma-text);
+      margin: 0;
+      padding: 0;
+      font-family: Inter, -apple-system, sans-serif;
+      overflow: hidden;
+    }
+    .message-container {
+      height: calc(100vh - 130px);
+      overflow-y: auto;
+    }
+    .hidden { display: none !important; }
+    .prose p { margin-bottom: 0.5rem; }
+    .prose p:last-child { margin-bottom: 0; }
+    .prose pre { background: #1e293b; color: #fff; padding: 0.75rem; border-radius: 0.375rem; overflow-x: auto; margin: 0.5rem 0; font-size: 0.8em; }
+    .prose code { background: rgba(0,0,0,0.1); padding: 0.1rem 0.2rem; border-radius: 0.2rem; font-size: 0.9em; font-family: monospace; }
+    .prose strong { font-weight: 600; color: inherit; }
+    .prose ul { list-style-type: disc; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+    .prose ol { list-style-type: decimal; padding-left: 1.25rem; margin-bottom: 0.5rem; }
+    .dark .prose code { background: rgba(255,255,255,0.2); }
+  </style>
+</head>
+<body class="flex flex-col h-screen relative text-sm">
+  <header class="p-3 border-b flex justify-between items-center bg-white shadow-sm z-10" style="border-color: var(--figma-border);">
+    <h1 class="font-bold text-gray-800 text-base flex items-center gap-2">
+      <span class="text-xl">✨</span>智能 UI 导师
+    </h1>
+    <div class="flex items-center gap-0.5">
+      <button type="button" id="clearChatBtn" class="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors" title="清空本轮对话（充值后若界面还显示旧错误，可点一次再提问）">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+          <path d="M16 16h5v5"></path>
+        </svg>
+      </button>
+      <button type="button" id="settingsBtn" class="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors" title="设置">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="chatArea" class="message-container flex-1 p-4 flex flex-col gap-4 bg-gray-50 scroll-smooth">
+    <div class="bg-indigo-50 border border-indigo-100 text-indigo-900 p-3.5 rounded-xl self-start max-w-[90%] shadow-sm leading-relaxed prose prose-sm">
+      你好！我是你的智能 UI 设计导师。可问排版、配色、交互与规范。<strong>充值到账后一般不用改 API 设置</strong>，直接提问即可。若气泡里还留着以前的报错，可先点标题栏右侧<strong>刷新图标</strong>清空本轮对话再试。
+    </div>
+  </main>
+
+  <footer class="bg-white border-t z-10 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] p-3" style="border-color: var(--figma-border);">
+    <form id="chatForm" class="flex gap-2 items-center">
+      <div class="flex-1 relative min-w-0">
+        <input type="text" id="userInput" class="w-full pl-3 pr-12 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow bg-gray-50" placeholder="例如：推荐一个护眼后台配色…" autocomplete="off">
+        <button type="submit" id="submitBtn" class="absolute right-1 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center justify-center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
+      </div>
+    </form>
+  </footer>
+
+  <div id="settingsModal" class="hidden absolute inset-0 bg-black/60 z-50 flex flex-col justify-end transition-opacity">
+    <div class="bg-white rounded-t-xl p-5 w-full shadow-2xl transform transition-transform translate-y-0 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-bold text-gray-800">模型 API 设置</h2>
+        <button id="closeSettingsBtn" class="text-gray-400 hover:text-gray-700">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium mb-1.5 text-gray-700">API Key</label>
+          <input type="password" id="apiKey" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="sk-...">
+          <p class="text-xs text-gray-500 mt-1">例如在 SiliconFlow 生成的 API 密钥</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5 text-gray-700">Base URL</label>
+          <input type="text" id="baseUrl" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" value="https://api.siliconflow.cn/v1/chat/completions">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5 text-gray-700">模型名称 (Model)</label>
+          <input type="text" id="tutorModelId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" value="Qwen/Qwen2.5-7B-Instruct" autocomplete="off">
+          <p class="text-xs text-gray-500 mt-1">填写对话接口使用的完整模型 ID（与平台「模型广场」一致），例如 <code>Qwen/Qwen2.5-7B-Instruct</code>。</p>
+        </div>
+      </div>
+      <div class="mt-6">
+        <button id="saveSettingsBtn" class="w-full py-2.5 bg-gray-900 text-white font-medium rounded-md hover:bg-gray-800 transition-colors">保存并关闭</button>
+        <p class="text-xs text-gray-400 text-center mt-3">插件 UI 修订 2026-03-24b（修复 loadSettings 空节点）· Figma「插件 → 开发 → 重新加载」</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SYSTEM_PROMPT = `你是一位拥有10年以上经验的顶级UI/UX设计专家和导师，精通交互心理学、色彩理论和排版美学。
+你的任务是辅助正在使用 Figma 进行设计的用户，像一位坐在一旁的导师一样提供即时建议。
+
+你可以提供关于以下方面的专业建议：
+1. **配色方案**：基于色彩心理学和无障碍标准（WCAG）推荐色彩搭配。
+2. **排版与字体**：提供字体层级、行高、字间距和字体组合的建议。
+3. **交互设计**：设计直观的用户流和微交互。
+4. **设计规范**：解答关于 iOS Human Interface Guidelines、Material Design 3 等规范的问题。
+5. **布局与网格**：提供关于响应式设计、8pt网格系统和留白使用的指导。
+
+【回答要求（极其重要）】：
+- **简明扼要**：Figma 插件视窗很小，禁止长篇大论，直接切入重点。
+- **提供确切数值**：如果用户要配色，直接给 HEX（如 #1E293B）；如果问字号，直接给 PX 和字重。
+- **Markdown 格式**：使用 Markdown 粗体突出关键参数，使用列表使条理清晰。
+- **专业且鼓励**：以“导师”口吻说话，既要指出问题，也要给出可落地的解决方案。`;
+
+    const chatForm = document.getElementById('chatForm');
+    const userInput = document.getElementById('userInput');
+    const submitBtn = document.getElementById('submitBtn');
+    const chatArea = document.getElementById('chatArea');
+    const clearChatBtn = document.getElementById('clearChatBtn');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsModal = document.getElementById('settingsModal');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    const apiKeyEl = document.getElementById('apiKey');
+    const baseUrlEl = document.getElementById('baseUrl');
+    /** 新版 id 为 tutorModelId；若 Figma 仍缓存旧 ui（仅 modelName），此处兼容避免 loadSettings 报错 */
+    function getModelInputEl() {
+      return document.getElementById('tutorModelId') || document.getElementById('modelName');
+    }
+
+    let chatHistory = [];
+
+    const storage = {
+      get: (key) => {
+        try { return localStorage.getItem(key); } catch (e) { return null; }
+      },
+      set: (key, val) => {
+        try { localStorage.setItem(key, val); } catch (e) {}
+      }
+    };
+
+    const loadSettings = () => {
+      const apiKey = storage.get('tutor_apiKey') || '';
+      const baseUrl = storage.get('tutor_baseUrl') || 'https://api.siliconflow.cn/v1/chat/completions';
+      const modelName = storage.get('tutor_modelName') || 'Qwen/Qwen2.5-7B-Instruct';
+      if (apiKeyEl) apiKeyEl.value = apiKey;
+      if (baseUrlEl) baseUrlEl.value = baseUrl;
+      const modelEl = getModelInputEl();
+      if (modelEl) modelEl.value = modelName;
+    };
+
+    const saveSettings = () => {
+      if (apiKeyEl) storage.set('tutor_apiKey', apiKeyEl.value.trim());
+      if (baseUrlEl) storage.set('tutor_baseUrl', baseUrlEl.value.trim());
+      const modelEl = getModelInputEl();
+      if (modelEl) storage.set('tutor_modelName', modelEl.value.trim());
+      settingsModal.classList.add('hidden');
+    };
+
+    settingsBtn.addEventListener('click', () => {
+      settingsModal.classList.remove('hidden');
+      settingsModal.style.display = 'flex';
+    });
+    closeSettingsBtn.addEventListener('click', () => {
+      settingsModal.classList.add('hidden');
+      settingsModal.style.display = 'none';
+    });
+    saveSettingsBtn.addEventListener('click', () => {
+      saveSettings();
+      settingsModal.style.display = 'none';
+    });
+
+    loadSettings();
+
+    function welcomeBubbleHtml() {
+      return '<div class="bg-indigo-50 border border-indigo-100 text-indigo-900 p-3.5 rounded-xl self-start max-w-[90%] shadow-sm leading-relaxed prose prose-sm">你好！我是你的智能 UI 设计导师。可问排版、配色、交互与规范。<strong>充值到账后一般不用改 API 设置</strong>，直接提问即可。若气泡里还留着以前的报错，可先点标题栏右侧<strong>刷新图标</strong>清空本轮对话再试。</div>';
+    }
+
+    function resetChatToWelcome() {
+      chatHistory = [];
+      chatArea.innerHTML = welcomeBubbleHtml();
+      userInput.focus();
+      chatArea.scrollTop = 0;
+    }
+
+    if (clearChatBtn) {
+      clearChatBtn.addEventListener('click', () => {
+        resetChatToWelcome();
+      });
+    }
+
+    function createMessageEl(role) {
+      const div = document.createElement('div');
+      if (role === 'user') {
+        div.className = 'bg-white border border-gray-200 text-gray-800 p-3 rounded-xl rounded-br-sm self-end max-w-[85%] shadow-sm prose prose-sm leading-relaxed word-break break-words';
+      } else {
+        div.className = 'bg-indigo-50 border border-indigo-100 text-indigo-950 p-3.5 rounded-xl rounded-bl-sm self-start max-w-[90%] shadow-sm prose prose-sm leading-relaxed word-break break-words';
+      }
+      return div;
+    }
+
+    function renderMarkdown(text) {
+      if (typeof marked !== 'undefined') {
+        try {
+          return marked.parse(text);
+        } catch (e) {
+          console.warn('Markdown parse error:', e);
+          return text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        }
+      }
+      return text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    /** 旧版本会话里可能残留多模态 content（数组），会导致纯文本模型报 20041 */
+    function messageContentToPlainString(content) {
+      if (typeof content === 'string') return content;
+      if (Array.isArray(content)) {
+        const texts = content
+          .filter((part) => part && part.type === 'text')
+          .map((part) => (typeof part.text === 'string' ? part.text : ''))
+          .filter(Boolean);
+        const hasImage = content.some((part) => part && part.type === 'image_url');
+        let s = texts.join('\n').trim();
+        if (hasImage) {
+          s = (s ? s + '\n' : '') + '（本条历史曾含图片，已省略，仅保留文字）';
+        }
+        return s || '（空）';
+      }
+      if (content == null) return '';
+      return String(content);
+    }
+
+    function sanitizeChatHistoryInPlace() {
+      chatHistory = chatHistory.map((m) => ({
+        role: m.role,
+        content: messageContentToPlainString(m.content)
+      }));
+    }
+
+    function buildApiMessages() {
+      const msgs = [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...chatHistory.map((m) => ({
+          role: m.role,
+          content: messageContentToPlainString(m.content)
+        }))
+      ];
+      // 硅基流动对非 VLM 模型：content 必须是纯字符串，不能是 [{type,text}] 数组
+      return msgs.map((m) => ({ role: m.role, content: String(m.content == null ? '' : m.content) }));
+    }
+
+    function formatNetworkError(errRaw) {
+      const err = String(errRaw || '');
+      if (/20041|not a VLM|Vision Language Model/i.test(err)) {
+        return '<p class="text-red-600 font-semibold">接口判定请求里含「多模态」内容（20041）</p>'
+          + '<p class="text-sm mt-2 text-gray-700">若你曾用过带图/旧版插件，会话里可能残留图片消息。请点本插件右上角菜单选择 <strong>关闭再重新打开</strong>，或新开一次插件清空会话后再试。</p>'
+          + '<p class="text-xs text-gray-500 mt-2">' + escapeHtml(err) + '</p>';
+      }
+      if (/30001|balance is insufficient|insufficient/i.test(err)) {
+        return '<p class="text-red-600 font-semibold">账户余额不足（30001）</p>'
+          + '<p class="text-sm mt-2 text-gray-700 leading-relaxed">这是<strong>硅基流动服务端</strong>返回的：当前账号可用余额或赠送额度已用完。插件无法绕过，需要在平台侧处理。</p>'
+          + '<ul class="text-sm mt-2 text-gray-700 list-disc pl-5 space-y-1">'
+          + '<li>登录 <a href="https://cloud.siliconflow.cn/" target="_blank" rel="noopener noreferrer" class="text-indigo-600 underline">cloud.siliconflow.cn</a>，在控制台找到<strong>充值 / 账单 / 余额</strong>（以页面实际菜单为准）</li>'
+          + '<li>查看是否有<strong>新人礼包、活动赠送、免费额度</strong>可领</li>'
+          + '<li>或暂时换用<strong>其他仍有余额</strong>的 API Key（在插件设置里更换）</li>'
+          + '</ul>'
+          + '<p class="text-xs text-gray-500 mt-2">' + escapeHtml(err) + '</p>';
+      }
+      return '<strong>请求出错：</strong><br>' + escapeHtml(err);
+    }
+
+    function finishSendUi() {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>';
+      userInput.focus();
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    chatForm.onsubmit = async (e) => {
+      e.preventDefault();
+      try {
+        const text = userInput.value.trim();
+        if (!text) return;
+
+        const apiKey = (storage.get('tutor_apiKey') || '').trim();
+        if (!apiKey) {
+          alert('请先点击右上角设置图标，配置你的 API Key');
+          settingsModal.classList.remove('hidden');
+          settingsModal.style.display = 'flex';
+          return;
+        }
+
+        const chatModelId = storage.get('tutor_modelName') || 'Qwen/Qwen2.5-7B-Instruct';
+
+        const userDiv = createMessageEl('user');
+        userDiv.innerHTML = renderMarkdown(text);
+        chatArea.appendChild(userDiv);
+        chatHistory.push({ role: 'user', content: text });
+        sanitizeChatHistoryInPlace();
+
+        userInput.value = '';
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+        chatArea.scrollTop = chatArea.scrollHeight;
+
+        const assistantDiv = createMessageEl('assistant');
+        assistantDiv.innerHTML = '<span class="animate-pulse text-indigo-400">正在思考...</span>';
+        chatArea.appendChild(assistantDiv);
+        chatArea.scrollTop = chatArea.scrollHeight;
+
+        let apiUrl = storage.get('tutor_baseUrl') || 'https://api.siliconflow.cn/v1/chat/completions';
+        if (apiUrl.endsWith('/')) apiUrl = apiUrl.slice(0, -1);
+        if (!apiUrl.endsWith('/chat/completions')) {
+          apiUrl = `${apiUrl}/chat/completions`;
+        }
+
+        const messageHandler = (event) => {
+          const msg = event.data.pluginMessage;
+          if (msg && msg.type === 'networkResponse') {
+            window.removeEventListener('message', messageHandler);
+            if (msg.error) {
+              assistantDiv.innerHTML = `<div class="text-red-500 prose prose-sm max-w-none">${formatNetworkError(msg.error)}</div>`;
+            } else {
+              const assistantContent = msg.data && msg.data.choices && msg.data.choices[0] && msg.data.choices[0].message
+                ? msg.data.choices[0].message.content
+                : null;
+              if (assistantContent == null || assistantContent === '') {
+                assistantDiv.innerHTML = '<div class="text-amber-700 text-sm">接口未返回有效内容，请稍后重试或检查模型与 Key。</div>';
+              } else {
+                assistantDiv.innerHTML = renderMarkdown(assistantContent);
+                chatHistory.push({ role: 'assistant', content: assistantContent });
+              }
+              chatArea.scrollTop = chatArea.scrollHeight;
+            }
+            finishSendUi();
+          }
+        };
+        window.addEventListener('message', messageHandler);
+
+        parent.postMessage({ pluginMessage: { type: 'networkRequest', url: apiUrl, body: {
+          model: chatModelId,
+          messages: buildApiMessages(),
+          stream: false,
+          temperature: 0.7
+        }, apiKey: apiKey } }, '*');
+      } catch (err) {
+        console.error('Plugin run error:', err);
+        alert('插件运行出错: ' + err.message);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>';
+      }
+    };
+  </script>
+</body>
+</html>

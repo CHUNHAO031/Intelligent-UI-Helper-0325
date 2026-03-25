@@ -1,0 +1,12 @@
+{
+  "name": "智能 UI 导师 (v3)",
+  "id": "1198273847581233",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui-v3.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["*"],
+    "reasoning": "加载前端样式库和访问大语言模型 API"
+  }
+}
