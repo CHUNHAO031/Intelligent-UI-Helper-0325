@@ -40,7 +40,7 @@
       <h1 class="font-bold text-gray-800 text-base flex items-center gap-2">
         <span class="text-xl">✨</span>智能 UI 导师
       </h1>
-      <p class="text-[10px] text-gray-400 mt-0.5 truncate" title="若看不到此行，说明 Figma 未加载本目录的 ui-v3.html，请重新导入 manifest">UI v3 · 2026-03-24e（已内置 API Key）</p>
+      <p class="text-[10px] text-gray-400 mt-0.5 truncate" title="若看不到此行，说明 Figma 未加载本目录的 ui-v3.html，请重新导入 manifest">UI v3 · 2026-03-25e（修复图生图 500 报错）</p>
     </div>
     <div class="flex items-center gap-0.5">
       <button type="button" id="clearChatBtn" class="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors" title="清空本轮对话（充值后若界面还显示旧错误，可点一次再提问）">
@@ -69,12 +69,34 @@
   </main>
 
   <footer class="bg-white border-t z-10 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] p-3" style="border-color: var(--figma-border);">
-    <form id="chatForm" class="flex gap-2 items-center">
-      <div class="flex-1 relative min-w-0">
-        <input type="text" id="userInput" class="w-full pl-3 pr-12 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow bg-gray-50" placeholder="例如：推荐一个护眼后台配色…" autocomplete="off">
-        <button type="submit" id="submitBtn" class="absolute right-1 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center justify-center">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+    <form id="chatForm" class="flex flex-col gap-2">
+      <div class="flex gap-4 px-1">
+        <label class="flex items-center gap-1 cursor-pointer text-xs text-gray-600 font-medium">
+          <input type="radio" name="chatMode" value="chat" checked class="accent-indigo-600"> 💬 聊天问答
+        </label>
+        <label class="flex items-center gap-1 cursor-pointer text-xs text-gray-600 font-medium">
+          <input type="radio" name="chatMode" value="image" class="accent-indigo-600"> 🎨 生成图片
+        </label>
+        <label class="flex items-center gap-1 cursor-pointer text-xs text-gray-600 font-medium">
+          <input type="radio" name="chatMode" value="edit" class="accent-indigo-600" title="选中Figma中的图层进行AI编辑"> 🖼️ 图像编辑
+        </label>
+      </div>
+      <div class="flex gap-2 items-center">
+        <button type="button" id="getImageBtn" class="hidden px-2.5 py-1.5 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300 transition-colors whitespace-nowrap" title="从Figma画布中提取选中的图层作为原图">
+          <span class="flex items-center gap-1">🖼️ 提取选中图层</span>
         </button>
+        <div class="flex-1 relative min-w-0">
+          <input type="text" id="userInput" class="w-full pl-3 pr-12 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow bg-gray-50" placeholder="聊天提问或输入提示词..." autocomplete="off">
+          <button type="submit" id="submitBtn" class="absolute right-1 top-1/2 -translate-y-1/2 px-2.5 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center justify-center">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
+        </div>
+      </div>
+      <div id="imagePreviewContainer" class="hidden px-1">
+        <div class="flex items-center gap-2 text-xs text-indigo-700 bg-indigo-50 px-2 py-1 rounded w-fit border border-indigo-100">
+          <span id="imagePreviewName">已提取图片 (准备编辑)</span>
+          <button type="button" id="clearImageBtn" class="text-red-500 hover:text-red-700 font-bold ml-1" title="清除图片">×</button>
+        </div>
       </div>
     </form>
   </footer>
@@ -101,6 +123,11 @@
           <label class="block text-sm font-medium mb-1.5 text-gray-700">模型名称 (Model)</label>
           <input type="text" id="tutorModelId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" value="Qwen/Qwen2.5-7B-Instruct" autocomplete="off">
           <p class="text-xs text-gray-500 mt-1">填写对话接口使用的完整模型 ID（与平台「模型广场」一致），例如 <code>Qwen/Qwen2.5-7B-Instruct</code>。</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1.5 text-gray-700">生图模型 (Image Model)</label>
+          <input type="text" id="tutorImageModelId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" value="Qwen/Qwen-Image" autocomplete="off">
+          <p class="text-xs text-gray-500 mt-1">默认用于文生图和图生图。例如 <code>Qwen/Qwen-Image</code> 或 <code>black-forest-labs/FLUX.1-schnell</code></p>
         </div>
       </div>
       <div class="mt-6">
@@ -145,6 +172,63 @@
     }
 
     let chatHistory = [];
+    let selectedImageBytes = null;
+
+    const modeRadios = document.getElementsByName('chatMode');
+    const getImageBtn = document.getElementById('getImageBtn');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const clearImageBtn = document.getElementById('clearImageBtn');
+
+    function updateModeUI() {
+      let mode = 'chat';
+      for (const r of modeRadios) { if (r.checked) mode = r.value; }
+      if (mode === 'edit') {
+        getImageBtn.classList.remove('hidden');
+        if (selectedImageBytes) imagePreviewContainer.classList.remove('hidden');
+        userInput.placeholder = "输入图片编辑指令 (如：把背景换成雪山)...";
+      } else {
+        getImageBtn.classList.add('hidden');
+        imagePreviewContainer.classList.add('hidden');
+        userInput.placeholder = mode === 'image' ? "输入提示词生成图片..." : "聊天提问 (如：护眼配色)...";
+      }
+    }
+
+    if (modeRadios) {
+      for (const r of modeRadios) {
+        r.addEventListener('change', updateModeUI);
+      }
+    }
+
+    if (getImageBtn) {
+      getImageBtn.addEventListener('click', () => {
+        parent.postMessage({ pluginMessage: { type: 'getSelectedImage' } }, '*');
+      });
+    }
+
+    if (clearImageBtn) {
+      clearImageBtn.addEventListener('click', () => {
+        selectedImageBytes = null;
+        imagePreviewContainer.classList.add('hidden');
+      });
+    }
+
+    // listen for selectedImage response
+    window.addEventListener('message', (event) => {
+      const msg = event.data.pluginMessage;
+      if (msg && msg.type === 'selectedImage') {
+        if (msg.error) {
+          showStatusBanner(msg.error, 'error');
+        } else if (msg.bytes) {
+          selectedImageBytes = new Uint8Array(msg.bytes);
+          hideStatusBanner();
+          let mode = 'chat';
+          for (const r of modeRadios) { if (r.checked) mode = r.value; }
+          if (mode === 'edit') {
+            imagePreviewContainer.classList.remove('hidden');
+          }
+        }
+      }
+    });
 
     const storage = {
       get: (key) => {
@@ -186,10 +270,13 @@
       const apiKey = storage.get('tutor_apiKey') || 'sk-yllgcljmiwlyxxyqpkuwyuyysbjuifthhsatfqccorotccqc';
       const baseUrl = storage.get('tutor_baseUrl') || 'https://api.siliconflow.cn/v1/chat/completions';
       const storedChatModel = storage.get('tutor_modelName') || 'Qwen/Qwen2.5-7B-Instruct';
+      const storedImageModel = storage.get('tutor_imageModelName') || 'Qwen/Qwen-Image';
       if (apiKeyEl) apiKeyEl.value = apiKey;
       if (baseUrlEl) baseUrlEl.value = baseUrl;
       const modelEl = getModelInputEl();
       if (modelEl) modelEl.value = storedChatModel;
+      const imageModelEl = document.getElementById('tutorImageModelId');
+      if (imageModelEl) imageModelEl.value = storedImageModel;
     };
 
     const saveSettings = () => {
@@ -197,6 +284,8 @@
       if (baseUrlEl) storage.set('tutor_baseUrl', baseUrlEl.value.trim());
       const modelEl = getModelInputEl();
       if (modelEl) storage.set('tutor_modelName', modelEl.value.trim());
+      const imageModelEl = document.getElementById('tutorImageModelId');
+      if (imageModelEl) storage.set('tutor_imageModelName', imageModelEl.value.trim());
       if (settingsModal) settingsModal.classList.add('hidden');
     };
 
@@ -373,7 +462,16 @@
         }
         hideStatusBanner();
 
-        const chatModelId = storage.get('tutor_modelName') || 'Qwen/Qwen2.5-7B-Instruct';
+        const modeRadios = document.getElementsByName('chatMode');
+        let mode = 'chat';
+        if (modeRadios) {
+          for (const r of modeRadios) { if (r.checked) mode = r.value; }
+        }
+
+        if (mode === 'edit' && !selectedImageBytes) {
+          showStatusBanner('图像编辑模式需要先点击 [提取选中图层] 按钮获取原图', 'warn');
+          return;
+        }
 
         const userDiv = createMessageEl('user');
         userDiv.innerHTML = renderMarkdown(text);
@@ -387,14 +485,84 @@
         chatArea.scrollTop = chatArea.scrollHeight;
 
         const assistantDiv = createMessageEl('assistant');
-        assistantDiv.innerHTML = '<span class="animate-pulse text-indigo-400">正在思考...</span>';
+        assistantDiv.innerHTML = '<span class="animate-pulse text-indigo-400">' + (mode === 'image' || mode === 'edit' ? '正在施展画技...' : '正在思考...') + '</span>';
         chatArea.appendChild(assistantDiv);
         chatArea.scrollTop = chatArea.scrollHeight;
 
         let apiUrl = storage.get('tutor_baseUrl') || 'https://api.siliconflow.cn/v1/chat/completions';
         if (apiUrl.endsWith('/')) apiUrl = apiUrl.slice(0, -1);
-        if (!apiUrl.endsWith('/chat/completions')) {
-          apiUrl = `${apiUrl}/chat/completions`;
+        
+        if (mode === 'edit') {
+          // 由于硅基流动并没有单独的 images/edits 接口，Qwen-Image-Edit-2509 也是通过 images/generations 接口调用
+          if (apiUrl.endsWith('/chat/completions')) apiUrl = apiUrl.replace('/chat/completions', '/images/generations');
+          else if (!apiUrl.endsWith('/images/generations')) apiUrl = `${apiUrl}/images/generations`;
+          
+          parent.postMessage({ pluginMessage: { type: 'networkRequestImageEdit', url: apiUrl, apiKey: apiKey, prompt: text, model: storage.get('tutor_imageModelName') || 'Qwen/Qwen-Image', imageBytes: Array.from(selectedImageBytes) } }, '*');
+
+          let requestDone = false;
+          let requestTimer = null;
+          const clearRequestTimer = () => {
+            if (requestTimer) {
+              clearTimeout(requestTimer);
+              requestTimer = null;
+            }
+          };
+
+          const messageHandler = (event) => {
+            const msg = event.data.pluginMessage;
+            if (msg && msg.type === 'networkResponse') {
+              if (requestDone) return;
+              requestDone = true;
+              clearRequestTimer();
+              window.removeEventListener('message', messageHandler);
+              if (msg.error) {
+                assistantDiv.innerHTML = `<div class="text-red-500 prose prose-sm max-w-none">${formatNetworkError(msg.error)}</div>`;
+              } else {
+                const imageArr = msg.data.images ? msg.data.images : (msg.data.data ? msg.data.data : null);
+                const imageUrl = imageArr && imageArr[0] && imageArr[0].url ? imageArr[0].url : null;
+                if (!imageUrl) {
+                  assistantDiv.innerHTML = '<div class="text-amber-700 text-sm">编辑失败或接口未返回图片 URL。请检查模型名称和额度。</div>';
+                } else {
+                  assistantDiv.innerHTML = `<img src="${imageUrl}" alt="Edited Image" class="w-full rounded-lg shadow-sm border border-gray-200 mt-2">`;
+                  chatHistory.push({ role: 'assistant', content: `（已为您生成编辑后的图片，请参考上图）` });
+                  sanitizeChatHistoryInPlace();
+                }
+              }
+              finishSendUi();
+            }
+          };
+
+          requestTimer = setTimeout(() => {
+            if (requestDone) return;
+            requestDone = true;
+            window.removeEventListener('message', messageHandler);
+            assistantDiv.innerHTML = '<div class="text-red-600 text-sm">请求超时（90s），请检查网络后重试。</div>';
+            sendNotify('图生图请求超时', true);
+            finishSendUi();
+          }, 90000);
+
+          window.addEventListener('message', messageHandler);
+          return;
+        }
+
+        let requestBody = {};
+        
+        if (mode === 'chat') {
+          if (!apiUrl.endsWith('/chat/completions')) apiUrl = `${apiUrl}/chat/completions`;
+          requestBody = {
+            model: storage.get('tutor_modelName') || 'Qwen/Qwen2.5-7B-Instruct',
+            messages: buildApiMessages(),
+            stream: false,
+            temperature: 0.7
+          };
+        } else {
+          if (apiUrl.endsWith('/chat/completions')) apiUrl = apiUrl.replace('/chat/completions', '/images/generations');
+          else if (!apiUrl.endsWith('/images/generations')) apiUrl = `${apiUrl}/images/generations`;
+          requestBody = {
+            model: storage.get('tutor_imageModelName') || 'Qwen/Qwen-Image',
+            prompt: text,
+            image_size: "1024x1024"
+          };
         }
 
         let requestDone = false;
@@ -416,16 +584,28 @@
             if (msg.error) {
               assistantDiv.innerHTML = `<div class="text-red-500 prose prose-sm max-w-none">${formatNetworkError(msg.error)}</div>`;
             } else {
-              const rawContent = msg.data && msg.data.choices && msg.data.choices[0] && msg.data.choices[0].message
-                ? msg.data.choices[0].message.content
-                : null;
-              const assistantContent = normalizeAssistantContent(rawContent);
-              if (!assistantContent) {
-                assistantDiv.innerHTML = '<div class="text-amber-700 text-sm">接口未返回有效内容，请稍后重试或检查模型与 Key。</div>';
+              if (mode === 'chat') {
+                const rawContent = msg.data && msg.data.choices && msg.data.choices[0] && msg.data.choices[0].message
+                  ? msg.data.choices[0].message.content
+                  : null;
+                const assistantContent = normalizeAssistantContent(rawContent);
+                if (!assistantContent) {
+                  assistantDiv.innerHTML = '<div class="text-amber-700 text-sm">接口未返回有效内容，请稍后重试或检查模型与 Key。</div>';
+                } else {
+                  assistantDiv.innerHTML = renderMarkdown(assistantContent);
+                  chatHistory.push({ role: 'assistant', content: assistantContent });
+                  sanitizeChatHistoryInPlace();
+                }
               } else {
-                assistantDiv.innerHTML = renderMarkdown(assistantContent);
-                chatHistory.push({ role: 'assistant', content: assistantContent });
-                sanitizeChatHistoryInPlace();
+                const imageArr = msg.data && msg.data.images ? msg.data.images : (msg.data && msg.data.data ? msg.data.data : null);
+                const imageUrl = imageArr && imageArr[0] && imageArr[0].url ? imageArr[0].url : null;
+                if (!imageUrl) {
+                  assistantDiv.innerHTML = '<div class="text-amber-700 text-sm">生图失败或接口未返回图片 URL。请检查模型名称和额度。</div>';
+                } else {
+                  assistantDiv.innerHTML = `<img src="${imageUrl}" alt="Generated Image" class="w-full rounded-lg shadow-sm border border-gray-200 mt-2">`;
+                  chatHistory.push({ role: 'assistant', content: `（已为您生成图片，请参考上图）` });
+                  sanitizeChatHistoryInPlace();
+                }
               }
               chatArea.scrollTop = chatArea.scrollHeight;
             }
@@ -444,12 +624,7 @@
 
         window.addEventListener('message', messageHandler);
 
-        parent.postMessage({ pluginMessage: { type: 'networkRequest', url: apiUrl, body: {
-          model: chatModelId,
-          messages: buildApiMessages(),
-          stream: false,
-          temperature: 0.7
-        }, apiKey: apiKey } }, '*');
+        parent.postMessage({ pluginMessage: { type: 'networkRequest', url: apiUrl, body: requestBody, apiKey: apiKey } }, '*');
       } catch (err) {
         console.error('Plugin run error:', err);
         showStatusBanner('插件异常：' + (err && err.message ? err.message : String(err)), 'error');
