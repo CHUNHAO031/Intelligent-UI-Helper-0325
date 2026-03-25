@@ -40,7 +40,7 @@
       <h1 class="font-bold text-gray-800 text-base flex items-center gap-2">
         <span class="text-xl">✨</span>智能 UI 导师
       </h1>
-      <p class="text-[10px] text-gray-400 mt-0.5 truncate" title="若看不到此行，说明 Figma 未加载本目录的 ui-v3.html，请重新导入 manifest">UI v3 · 2026-03-25e（修复图生图 500 报错）</p>
+      <p class="text-[10px] text-gray-400 mt-0.5 truncate" title="若看不到此行，说明 Figma 未加载本目录的 ui-v3.html，请重新导入 manifest">UI v3 · 2026-03-25f（默认使用 Edit-2509）</p>
     </div>
     <div class="flex items-center gap-0.5">
       <button type="button" id="clearChatBtn" class="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors" title="清空本轮对话（充值后若界面还显示旧错误，可点一次再提问）">
@@ -126,8 +126,8 @@
         </div>
         <div>
           <label class="block text-sm font-medium mb-1.5 text-gray-700">生图模型 (Image Model)</label>
-          <input type="text" id="tutorImageModelId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" value="Qwen/Qwen-Image" autocomplete="off">
-          <p class="text-xs text-gray-500 mt-1">默认用于文生图和图生图。例如 <code>Qwen/Qwen-Image</code> 或 <code>black-forest-labs/FLUX.1-schnell</code></p>
+          <input type="text" id="tutorImageModelId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" value="Qwen/Qwen-Image-Edit-2509" autocomplete="off">
+          <p class="text-xs text-gray-500 mt-1">默认用于文生图和图生图。例如 <code>Qwen/Qwen-Image-Edit-2509</code> 或 <code>black-forest-labs/FLUX.1-schnell</code></p>
         </div>
       </div>
       <div class="mt-6">
@@ -270,7 +270,7 @@
       const apiKey = storage.get('tutor_apiKey') || 'sk-yllgcljmiwlyxxyqpkuwyuyysbjuifthhsatfqccorotccqc';
       const baseUrl = storage.get('tutor_baseUrl') || 'https://api.siliconflow.cn/v1/chat/completions';
       const storedChatModel = storage.get('tutor_modelName') || 'Qwen/Qwen2.5-7B-Instruct';
-      const storedImageModel = storage.get('tutor_imageModelName') || 'Qwen/Qwen-Image';
+      const storedImageModel = storage.get('tutor_imageModelName') || 'Qwen/Qwen-Image-Edit-2509';
       if (apiKeyEl) apiKeyEl.value = apiKey;
       if (baseUrlEl) baseUrlEl.value = baseUrl;
       const modelEl = getModelInputEl();
@@ -497,7 +497,7 @@
           if (apiUrl.endsWith('/chat/completions')) apiUrl = apiUrl.replace('/chat/completions', '/images/generations');
           else if (!apiUrl.endsWith('/images/generations')) apiUrl = `${apiUrl}/images/generations`;
           
-          parent.postMessage({ pluginMessage: { type: 'networkRequestImageEdit', url: apiUrl, apiKey: apiKey, prompt: text, model: storage.get('tutor_imageModelName') || 'Qwen/Qwen-Image', imageBytes: Array.from(selectedImageBytes) } }, '*');
+          parent.postMessage({ pluginMessage: { type: 'networkRequestImageEdit', url: apiUrl, apiKey: apiKey, prompt: text, model: storage.get('tutor_imageModelName') || 'Qwen/Qwen-Image-Edit-2509', imageBytes: Array.from(selectedImageBytes) } }, '*');
 
           let requestDone = false;
           let requestTimer = null;
@@ -559,7 +559,7 @@
           if (apiUrl.endsWith('/chat/completions')) apiUrl = apiUrl.replace('/chat/completions', '/images/generations');
           else if (!apiUrl.endsWith('/images/generations')) apiUrl = `${apiUrl}/images/generations`;
           requestBody = {
-            model: storage.get('tutor_imageModelName') || 'Qwen/Qwen-Image',
+            model: storage.get('tutor_imageModelName') || 'Qwen/Qwen-Image-Edit-2509',
             prompt: text,
             image_size: "1024x1024"
           };
