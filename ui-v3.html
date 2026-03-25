@@ -37,12 +37,15 @@
 <body class="flex flex-col h-screen relative text-sm">
   <header class="p-3 border-b flex justify-between items-center bg-white shadow-sm z-10" style="border-color: var(--figma-border);">
     <div class="min-w-0">
-      <h1 class="font-bold text-gray-800 text-base flex items-center gap-2">
+      <h1 id="appTitle" class="font-bold text-gray-800 text-base flex items-center gap-2">
         <span class="text-xl">✨</span>智能 UI 导师
       </h1>
-      <p class="text-[10px] text-gray-400 mt-0.5 truncate" title="若看不到此行，说明 Figma 未加载本目录的 ui-v3.html，请重新导入 manifest">UI v3 · 2026-03-25g（分离文生图与图生图模型设置）</p>
+      <p class="text-[10px] text-gray-400 mt-0.5 truncate" title="若看不到此行，说明 Figma 未加载本目录的 ui-v3.html，请重新导入 manifest">UI v3 · 2026-03-25h（支持多语言）</p>
     </div>
     <div class="flex items-center gap-0.5">
+      <button type="button" id="langBtn" class="p-1.5 text-xs text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors font-medium" title="切换语言 / Language">
+        中/En
+      </button>
       <button type="button" id="clearChatBtn" class="p-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors" title="清空本轮对话（充值后若界面还显示旧错误，可点一次再提问）">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
@@ -71,19 +74,19 @@
   <footer class="bg-white border-t z-10 shadow-[0_-2px_10px_rgba(0,0,0,0.02)] p-3" style="border-color: var(--figma-border);">
     <form id="chatForm" class="flex flex-col gap-2">
       <div class="flex gap-4 px-1">
-        <label class="flex items-center gap-1 cursor-pointer text-xs text-gray-600 font-medium">
+        <label id="lblModeChat" class="flex items-center gap-1 cursor-pointer text-xs text-gray-600 font-medium">
           <input type="radio" name="chatMode" value="chat" checked class="accent-indigo-600"> 💬 聊天问答
         </label>
-        <label class="flex items-center gap-1 cursor-pointer text-xs text-gray-600 font-medium">
+        <label id="lblModeImage" class="flex items-center gap-1 cursor-pointer text-xs text-gray-600 font-medium">
           <input type="radio" name="chatMode" value="image" class="accent-indigo-600"> 🎨 生成图片
         </label>
-        <label class="flex items-center gap-1 cursor-pointer text-xs text-gray-600 font-medium">
-          <input type="radio" name="chatMode" value="edit" class="accent-indigo-600" title="选中Figma中的图层进行AI编辑"> 🖼️ 图像编辑
+        <label id="lblModeEdit" class="flex items-center gap-1 cursor-pointer text-xs text-gray-600 font-medium" title="选中Figma中的图层进行AI编辑">
+          <input type="radio" name="chatMode" value="edit" class="accent-indigo-600"> 🖼️ 图像编辑
         </label>
       </div>
       <div class="flex gap-2 items-center">
         <button type="button" id="getImageBtn" class="hidden px-2.5 py-1.5 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300 transition-colors whitespace-nowrap" title="从Figma画布中提取选中的图层作为原图">
-          <span class="flex items-center gap-1">🖼️ 提取选中图层</span>
+          <span id="getImageBtnText" class="flex items-center gap-1">🖼️ 提取选中图层</span>
         </button>
         <div class="flex-1 relative min-w-0">
           <input type="text" id="userInput" class="w-full pl-3 pr-12 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow bg-gray-50" placeholder="聊天提问或输入提示词..." autocomplete="off">
@@ -104,7 +107,7 @@
   <div id="settingsModal" class="hidden absolute inset-0 bg-black/60 z-50 flex flex-col justify-end transition-opacity">
     <div class="bg-white rounded-t-xl p-5 w-full shadow-2xl transform transition-transform translate-y-0 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-bold text-gray-800">模型 API 设置</h2>
+        <h2 id="settingTitle" class="text-lg font-bold text-gray-800">模型 API 设置</h2>
         <button id="closeSettingsBtn" class="text-gray-400 hover:text-gray-700">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
@@ -113,26 +116,26 @@
         <div>
           <label class="block text-sm font-medium mb-1.5 text-gray-700">API Key</label>
           <input type="password" id="apiKey" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="sk-...">
-          <p class="text-xs text-gray-500 mt-1">例如在 SiliconFlow 生成的 API 密钥</p>
+          <p id="apiDesc" class="text-xs text-gray-500 mt-1">例如在 SiliconFlow 生成的 API 密钥</p>
         </div>
         <div>
           <label class="block text-sm font-medium mb-1.5 text-gray-700">Base URL</label>
           <input type="text" id="baseUrl" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" value="https://api.siliconflow.cn/v1/chat/completions">
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1.5 text-gray-700">模型名称 (Model)</label>
+          <label id="chatModelTitle" class="block text-sm font-medium mb-1.5 text-gray-700">模型名称 (Model)</label>
           <input type="text" id="tutorModelId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" value="Qwen/Qwen2.5-7B-Instruct" autocomplete="off">
-          <p class="text-xs text-gray-500 mt-1">填写对话接口使用的完整模型 ID（与平台「模型广场」一致），例如 <code>Qwen/Qwen2.5-7B-Instruct</code>。</p>
+          <p id="chatModelDesc" class="text-xs text-gray-500 mt-1">填写对话接口使用的完整模型 ID（与平台「模型广场」一致），例如 <code>Qwen/Qwen2.5-7B-Instruct</code>。</p>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1.5 text-gray-700">文生图模型 (Text-to-Image)</label>
+          <label id="t2iTitle" class="block text-sm font-medium mb-1.5 text-gray-700">文生图模型 (Text-to-Image)</label>
           <input type="text" id="tutorT2IModelId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" value="Qwen/Qwen-Image" autocomplete="off">
-          <p class="text-xs text-gray-500 mt-1">用于纯文本生成图片。例如 <code>Qwen/Qwen-Image</code></p>
+          <p id="t2iDesc" class="text-xs text-gray-500 mt-1">用于纯文本生成图片。例如 <code>Qwen/Qwen-Image</code></p>
         </div>
         <div>
-          <label class="block text-sm font-medium mb-1.5 text-gray-700">图生图模型 (Image Editing)</label>
+          <label id="i2iTitle" class="block text-sm font-medium mb-1.5 text-gray-700">图生图模型 (Image Editing)</label>
           <input type="text" id="tutorI2IModelId" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" value="Qwen/Qwen-Image-Edit-2509" autocomplete="off">
-          <p class="text-xs text-gray-500 mt-1">用于图像编辑。例如 <code>Qwen/Qwen-Image-Edit-2509</code></p>
+          <p id="i2iDesc" class="text-xs text-gray-500 mt-1">用于图像编辑。例如 <code>Qwen/Qwen-Image-Edit-2509</code></p>
         </div>
       </div>
       <div class="mt-6">
@@ -143,7 +146,43 @@
   </div>
 
   <script>
-    const SYSTEM_PROMPT = `你是一位拥有10年以上经验的顶级UI/UX设计专家和导师，精通交互心理学、色彩理论和排版美学。
+    const translations = {
+      zh: {
+        appTitle: '<span class="text-xl">✨</span>智能 UI 导师',
+        clearTip: '清空本轮对话（充值后若界面还显示旧错误，可点一次再提问）',
+        settingsTip: '设置',
+        welcome: '你好！我是你的智能 UI 设计导师。可问排版、配色、交互与规范。<strong>充值到账后一般不用改 API 设置</strong>，直接提问即可。若气泡里还留着以前的报错，可先点标题栏右侧<strong>刷新图标</strong>清空本轮对话再试。',
+        modeChat: '💬 聊天问答',
+        modeImage: '🎨 生成图片',
+        modeEdit: '🖼️ 图像编辑',
+        modeEditTip: '选中Figma中的图层进行AI编辑',
+        extractBtn: '🖼️ 提取选中图层',
+        extractBtnTip: '从Figma画布中提取选中的图层作为原图',
+        phChat: '聊天提问或输入提示词...',
+        phChatMode: '聊天提问 (如：护眼配色)...',
+        phImageMode: '输入提示词生成图片...',
+        phEditMode: '输入图片编辑指令 (如：把背景换成雪山)...',
+        imgExtracted: '已提取图片 (准备编辑)',
+        clearImgTip: '清除图片',
+        settingTitle: '模型 API 设置',
+        apiDesc: '例如在 SiliconFlow 生成的 API 密钥',
+        chatModelTitle: '模型名称 (Model)',
+        chatModelDesc: '填写对话接口使用的完整模型 ID（与平台「模型广场」一致），例如 <code>Qwen/Qwen2.5-7B-Instruct</code>。',
+        t2iTitle: '文生图模型 (Text-to-Image)',
+        t2iDesc: '用于纯文本生成图片。例如 <code>Qwen/Qwen-Image</code>',
+        i2iTitle: '图生图模型 (Image Editing)',
+        i2iDesc: '用于图像编辑。例如 <code>Qwen/Qwen-Image-Edit-2509</code>',
+        saveBtn: '保存并关闭',
+        thinking: '正在思考...',
+        drawing: '正在施展画技...',
+        reqTimeoutChat: '请求超时（90s），请检查网络后重试，或点刷新图标清空会话。',
+        reqTimeoutImage: '图生图请求超时',
+        errNoImageGen: '生图失败或接口未返回图片 URL。请检查模型名称和额度。',
+        errNoImageEdit: '编辑失败或接口未返回图片 URL。请检查模型名称和额度。',
+        errNoContent: '接口未返回有效内容，请稍后重试或检查模型与 Key。',
+        errNeedKey: '请先在右上角「设置」里填写 API Key 并保存。',
+        errNeedImage: '图像编辑模式需要先点击 [提取选中图层] 按钮获取原图',
+        sysPrompt: `你是一位拥有10年以上经验的顶级UI/UX设计专家和导师，精通交互心理学、色彩理论和排版美学。
 你的任务是辅助正在使用 Figma 进行设计的用户，像一位坐在一旁的导师一样提供即时建议。
 
 你可以提供关于以下方面的专业建议：
@@ -157,7 +196,107 @@
 - **简明扼要**：Figma 插件视窗很小，禁止长篇大论，直接切入重点。
 - **提供确切数值**：如果用户要配色，直接给 HEX（如 #1E293B）；如果问字号，直接给 PX 和字重。
 - **Markdown 格式**：使用 Markdown 粗体突出关键参数，使用列表使条理清晰。
-- **专业且鼓励**：以“导师”口吻说话，既要指出问题，也要给出可落地的解决方案。`;
+- **专业且鼓励**：以“导师”口吻说话，既要指出问题，也要给出可落地的解决方案。`
+      },
+      en: {
+        appTitle: '<span class="text-xl">✨</span>Smart UI Tutor',
+        clearTip: 'Clear current conversation',
+        settingsTip: 'Settings',
+        welcome: 'Hello! I am your Smart UI Design Tutor. You can ask about typography, colors, interactions, and guidelines. <strong>No need to change API settings usually</strong>. If old errors remain, click the <strong>refresh icon</strong> on the top right to clear the conversation.',
+        modeChat: '💬 Chat',
+        modeImage: '🎨 Gen Image',
+        modeEdit: '🖼️ Edit Image',
+        modeEditTip: 'Select a layer in Figma for AI editing',
+        extractBtn: '🖼️ Extract Layer',
+        extractBtnTip: 'Extract selected layer from Figma canvas as original image',
+        phChat: 'Ask a question or enter prompt...',
+        phChatMode: 'Ask a question (e.g. eye-friendly colors)...',
+        phImageMode: 'Enter prompt to generate image...',
+        phEditMode: 'Enter edit prompt (e.g. change to snow background)...',
+        imgExtracted: 'Image extracted (ready for edit)',
+        clearImgTip: 'Clear image',
+        settingTitle: 'Model API Settings',
+        apiDesc: 'e.g. API Key generated on SiliconFlow',
+        chatModelTitle: 'Model Name (Chat)',
+        chatModelDesc: 'Complete model ID for chat interface, e.g. <code>Qwen/Qwen2.5-7B-Instruct</code>.',
+        t2iTitle: 'Text-to-Image Model',
+        t2iDesc: 'For text-to-image. e.g. <code>Qwen/Qwen-Image</code>',
+        i2iTitle: 'Image Editing Model',
+        i2iDesc: 'For image editing. e.g. <code>Qwen/Qwen-Image-Edit-2509</code>',
+        saveBtn: 'Save and Close',
+        thinking: 'Thinking...',
+        drawing: 'Drawing...',
+        reqTimeoutChat: 'Request timeout (90s). Please check your network and try again, or click refresh to clear.',
+        reqTimeoutImage: 'Image generation request timeout',
+        errNoImageGen: 'Image generation failed or no URL returned. Please check model and balance.',
+        errNoImageEdit: 'Image editing failed or no URL returned. Please check model and balance.',
+        errNoContent: 'No valid content returned. Please try again or check your model and Key.',
+        errNeedKey: 'Please fill in the API Key in the Settings first.',
+        errNeedImage: 'Image Editing mode requires extracting a layer first.',
+        sysPrompt: `You are a top-tier UI/UX design expert and mentor with over 10 years of experience, proficient in interaction psychology, color theory, and typography aesthetics.
+Your task is to assist users currently designing in Figma, providing real-time suggestions like a mentor sitting beside them.
+
+You can offer professional advice on the following aspects:
+1. **Color Schemes**: Recommend color combinations based on color psychology and accessibility standards (WCAG).
+2. **Typography & Fonts**: Provide advice on font hierarchy, line height, letter spacing, and font pairings.
+3. **Interaction Design**: Design intuitive user flows and micro-interactions.
+4. **Design Guidelines**: Answer questions about iOS Human Interface Guidelines, Material Design 3, etc.
+5. **Layout & Grids**: Offer guidance on responsive design, 8pt grid systems, and the use of whitespace.
+
+[Response Requirements (Extremely Important)]:
+- **Concise & Direct**: The Figma plugin window is small, prohibit lengthy essays, get straight to the point.
+- **Provide Exact Values**: If asking for colors, give HEX (e.g., #1E293B) directly; if asking for font sizes, give PX and font weight directly.
+- **Markdown Formatting**: Use Markdown bold to highlight key parameters, use lists for clarity.
+- **Professional & Encouraging**: Speak in a "mentor" tone, pointing out issues while also providing actionable solutions.`
+      }
+    };
+
+    let currentLang = 'zh';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      storage.set('tutor_lang', lang);
+      const t = translations[lang];
+      
+      document.getElementById('appTitle').innerHTML = t.appTitle;
+      document.getElementById('clearChatBtn').title = t.clearTip;
+      document.getElementById('settingsBtn').title = t.settingsTip;
+      
+      const chatRadio = document.querySelector('input[value="chat"]');
+      const imageRadio = document.querySelector('input[value="image"]');
+      const editRadio = document.querySelector('input[value="edit"]');
+      
+      document.getElementById('lblModeChat').innerHTML = `<input type="radio" name="chatMode" value="chat" ${chatRadio.checked?'checked':''} class="accent-indigo-600"> ${t.modeChat}`;
+      document.getElementById('lblModeImage').innerHTML = `<input type="radio" name="chatMode" value="image" ${imageRadio.checked?'checked':''} class="accent-indigo-600"> ${t.modeImage}`;
+      document.getElementById('lblModeEdit').innerHTML = `<input type="radio" name="chatMode" value="edit" ${editRadio.checked?'checked':''} class="accent-indigo-600"> ${t.modeEdit}`;
+      document.getElementById('lblModeEdit').title = t.modeEditTip;
+      
+      // Re-attach event listeners to the newly created radio inputs
+      const newModeRadios = document.getElementsByName('chatMode');
+      for (const r of newModeRadios) r.addEventListener('change', updateModeUI);
+
+      document.getElementById('getImageBtnText').innerHTML = t.extractBtn;
+      document.getElementById('getImageBtn').title = t.extractBtnTip;
+      
+      updateModeUI(); // updates placeholders
+      
+      document.getElementById('imagePreviewName').innerText = t.imgExtracted;
+      document.getElementById('clearImageBtn').title = t.clearImgTip;
+      
+      document.getElementById('settingTitle').innerText = t.settingTitle;
+      document.getElementById('apiDesc').innerText = t.apiDesc;
+      document.getElementById('chatModelTitle').innerText = t.chatModelTitle;
+      document.getElementById('chatModelDesc').innerHTML = t.chatModelDesc;
+      document.getElementById('t2iTitle').innerText = t.t2iTitle;
+      document.getElementById('t2iDesc').innerHTML = t.t2iDesc;
+      document.getElementById('i2iTitle').innerText = t.i2iTitle;
+      document.getElementById('i2iDesc').innerHTML = t.i2iDesc;
+      document.getElementById('saveSettingsBtn').innerText = t.saveBtn;
+      
+      if (chatHistory.length === 0) {
+        resetChatToWelcome();
+      }
+    }
 
     const chatForm = document.getElementById('chatForm');
     const userInput = document.getElementById('userInput');
@@ -183,18 +322,27 @@
     const getImageBtn = document.getElementById('getImageBtn');
     const imagePreviewContainer = document.getElementById('imagePreviewContainer');
     const clearImageBtn = document.getElementById('clearImageBtn');
+    const langBtn = document.getElementById('langBtn');
+
+    if (langBtn) {
+      langBtn.addEventListener('click', () => {
+        setLanguage(currentLang === 'zh' ? 'en' : 'zh');
+      });
+    }
 
     function updateModeUI() {
       let mode = 'chat';
-      for (const r of modeRadios) { if (r.checked) mode = r.value; }
+      const radios = document.getElementsByName('chatMode');
+      for (const r of radios) { if (r.checked) mode = r.value; }
+      const t = translations[currentLang];
       if (mode === 'edit') {
         getImageBtn.classList.remove('hidden');
         if (selectedImageBytes) imagePreviewContainer.classList.remove('hidden');
-        userInput.placeholder = "输入图片编辑指令 (如：把背景换成雪山)...";
+        userInput.placeholder = t.phEditMode;
       } else {
         getImageBtn.classList.add('hidden');
         imagePreviewContainer.classList.add('hidden');
-        userInput.placeholder = mode === 'image' ? "输入提示词生成图片..." : "聊天提问 (如：护眼配色)...";
+        userInput.placeholder = mode === 'image' ? t.phImageMode : t.phChatMode;
       }
     }
 
@@ -222,7 +370,11 @@
       const msg = event.data.pluginMessage;
       if (msg && msg.type === 'selectedImage') {
         if (msg.error) {
-          showStatusBanner(msg.error, 'error');
+          const t = translations[currentLang];
+          let errText = msg.error;
+          if (errText.includes('选中一个图层')) errText = currentLang === 'en' ? 'Please select a layer in Figma canvas first' : errText;
+          if (errText.includes('导出图层失败')) errText = currentLang === 'en' ? 'Failed to export layer. Make sure it is exportable.' : errText;
+          showStatusBanner(errText, 'error');
         } else if (msg.bytes) {
           selectedImageBytes = new Uint8Array(msg.bytes);
           hideStatusBanner();
@@ -272,6 +424,9 @@
     }
 
     const loadSettings = () => {
+      const lang = storage.get('tutor_lang') || 'zh';
+      setLanguage(lang);
+
       const apiKey = storage.get('tutor_apiKey') || 'sk-yllgcljmiwlyxxyqpkuwyuyysbjuifthhsatfqccorotccqc';
       const baseUrl = storage.get('tutor_baseUrl') || 'https://api.siliconflow.cn/v1/chat/completions';
       const storedChatModel = storage.get('tutor_modelName') || 'Qwen/Qwen2.5-7B-Instruct';
@@ -316,7 +471,7 @@
       saveSettingsBtn.addEventListener('click', () => {
         saveSettings();
         settingsModal.style.display = 'none';
-        sendNotify('已保存设置', false);
+        sendNotify(currentLang === 'zh' ? '已保存设置' : 'Settings saved', false);
         hideStatusBanner();
       });
     }
@@ -324,7 +479,8 @@
     loadSettings();
 
     function welcomeBubbleHtml() {
-      return '<div class="bg-indigo-50 border border-indigo-100 text-indigo-900 p-3.5 rounded-xl self-start max-w-[90%] shadow-sm leading-relaxed prose prose-sm">你好！我是你的智能 UI 设计导师。可问排版、配色、交互与规范。<strong>充值到账后一般不用改 API 设置</strong>，直接提问即可。若气泡里还留着以前的报错，可先点标题栏右侧<strong>刷新图标</strong>清空本轮对话再试。</div>';
+      const t = translations[currentLang];
+      return `<div class="bg-indigo-50 border border-indigo-100 text-indigo-900 p-3.5 rounded-xl self-start max-w-[90%] shadow-sm leading-relaxed prose prose-sm">${t.welcome}</div>`;
     }
 
     function resetChatToWelcome() {
@@ -397,8 +553,9 @@
     }
 
     function buildApiMessages() {
+      const t = translations[currentLang];
       const msgs = [
-        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'system', content: t.sysPrompt },
         ...chatHistory.map((m) => ({
           role: m.role,
           content: messageContentToPlainString(m.content)
@@ -429,22 +586,31 @@
 
     function formatNetworkError(errRaw) {
       const err = String(errRaw || '');
+      const t = translations[currentLang];
       if (/20041|not a VLM|Vision Language Model/i.test(err)) {
-        return '<p class="text-red-600 font-semibold">接口判定请求里含「多模态」内容（20041）</p>'
-          + '<p class="text-sm mt-2 text-gray-700">若你曾用过带图/旧版插件，会话里可能残留图片消息。请点本插件右上角菜单选择 <strong>关闭再重新打开</strong>，或新开一次插件清空会话后再试。</p>'
-          + '<p class="text-xs text-gray-500 mt-2">' + escapeHtml(err) + '</p>';
+        return currentLang === 'zh' 
+          ? '<p class="text-red-600 font-semibold">接口判定请求里含「多模态」内容（20041）</p>'
+            + '<p class="text-sm mt-2 text-gray-700">若你曾用过带图/旧版插件，会话里可能残留图片消息。请点本插件右上角菜单选择 <strong>关闭再重新打开</strong>，或新开一次插件清空会话后再试。</p>'
+            + '<p class="text-xs text-gray-500 mt-2">' + escapeHtml(err) + '</p>'
+          : '<p class="text-red-600 font-semibold">Multimodal content detected in request (20041)</p>'
+            + '<p class="text-sm mt-2 text-gray-700">If you used image generation previously, clear the conversation and try again.</p>'
+            + '<p class="text-xs text-gray-500 mt-2">' + escapeHtml(err) + '</p>';
       }
       if (/30001|balance is insufficient|insufficient/i.test(err)) {
-        return '<p class="text-red-600 font-semibold">账户余额不足（30001）</p>'
-          + '<p class="text-sm mt-2 text-gray-700 leading-relaxed">这是<strong>硅基流动服务端</strong>返回的：当前账号可用余额或赠送额度已用完。插件无法绕过，需要在平台侧处理。</p>'
-          + '<ul class="text-sm mt-2 text-gray-700 list-disc pl-5 space-y-1">'
-          + '<li>登录 <a href="https://cloud.siliconflow.cn/" target="_blank" rel="noopener noreferrer" class="text-indigo-600 underline">cloud.siliconflow.cn</a>，在控制台找到<strong>充值 / 账单 / 余额</strong>（以页面实际菜单为准）</li>'
-          + '<li>查看是否有<strong>新人礼包、活动赠送、免费额度</strong>可领</li>'
-          + '<li>或暂时换用<strong>其他仍有余额</strong>的 API Key（在插件设置里更换）</li>'
-          + '</ul>'
-          + '<p class="text-xs text-gray-500 mt-2">' + escapeHtml(err) + '</p>';
+        return currentLang === 'zh'
+          ? '<p class="text-red-600 font-semibold">账户余额不足（30001）</p>'
+            + '<p class="text-sm mt-2 text-gray-700 leading-relaxed">这是<strong>硅基流动服务端</strong>返回的：当前账号可用余额或赠送额度已用完。插件无法绕过，需要在平台侧处理。</p>'
+            + '<ul class="text-sm mt-2 text-gray-700 list-disc pl-5 space-y-1">'
+            + '<li>登录 <a href="https://cloud.siliconflow.cn/" target="_blank" rel="noopener noreferrer" class="text-indigo-600 underline">cloud.siliconflow.cn</a>，在控制台找到<strong>充值 / 账单 / 余额</strong>（以页面实际菜单为准）</li>'
+            + '<li>查看是否有<strong>新人礼包、活动赠送、免费额度</strong>可领</li>'
+            + '<li>或暂时换用<strong>其他仍有余额</strong>的 API Key（在插件设置里更换）</li>'
+            + '</ul>'
+            + '<p class="text-xs text-gray-500 mt-2">' + escapeHtml(err) + '</p>'
+          : '<p class="text-red-600 font-semibold">Insufficient Balance (30001)</p>'
+            + '<p class="text-sm mt-2 text-gray-700 leading-relaxed">Your SiliconFlow account balance is empty.</p>'
+            + '<p class="text-xs text-gray-500 mt-2">' + escapeHtml(err) + '</p>';
       }
-      return '<strong>请求出错：</strong><br>' + escapeHtml(err);
+      return (currentLang === 'zh' ? '<strong>请求出错：</strong><br>' : '<strong>Request Error:</strong><br>') + escapeHtml(err);
     }
 
     function finishSendUi() {
@@ -457,13 +623,14 @@
     chatForm.onsubmit = async (e) => {
       e.preventDefault();
       try {
+        const t = translations[currentLang];
         const text = userInput.value.trim();
         if (!text) return;
 
         const apiKey = (storage.get('tutor_apiKey') || 'sk-yllgcljmiwlyxxyqpkuwyuyysbjuifthhsatfqccorotccqc').trim();
         if (!apiKey) {
-          showStatusBanner('请先在右上角「设置」里填写 API Key 并保存。', 'warn');
-          sendNotify('请先在设置中填写 API Key', true);
+          showStatusBanner(t.errNeedKey, 'warn');
+          sendNotify(t.errNeedKey, true);
           if (settingsModal) {
             settingsModal.classList.remove('hidden');
             settingsModal.style.display = 'flex';
@@ -479,7 +646,7 @@
         }
 
         if (mode === 'edit' && !selectedImageBytes) {
-          showStatusBanner('图像编辑模式需要先点击 [提取选中图层] 按钮获取原图', 'warn');
+          showStatusBanner(t.errNeedImage, 'warn');
           return;
         }
 
@@ -494,8 +661,9 @@
         submitBtn.innerHTML = '<svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
         chatArea.scrollTop = chatArea.scrollHeight;
 
+        const t = translations[currentLang];
         const assistantDiv = createMessageEl('assistant');
-        assistantDiv.innerHTML = '<span class="animate-pulse text-indigo-400">' + (mode === 'image' || mode === 'edit' ? '正在施展画技...' : '正在思考...') + '</span>';
+        assistantDiv.innerHTML = '<span class="animate-pulse text-indigo-400">' + (mode === 'image' || mode === 'edit' ? t.drawing : t.thinking) + '</span>';
         chatArea.appendChild(assistantDiv);
         chatArea.scrollTop = chatArea.scrollHeight;
 
@@ -531,10 +699,10 @@
                 const imageArr = msg.data.images ? msg.data.images : (msg.data.data ? msg.data.data : null);
                 const imageUrl = imageArr && imageArr[0] && imageArr[0].url ? imageArr[0].url : null;
                 if (!imageUrl) {
-                  assistantDiv.innerHTML = '<div class="text-amber-700 text-sm">编辑失败或接口未返回图片 URL。请检查模型名称和额度。</div>';
+                  assistantDiv.innerHTML = `<div class="text-amber-700 text-sm">${t.errNoImageEdit}</div>`;
                 } else {
                   assistantDiv.innerHTML = `<img src="${imageUrl}" alt="Edited Image" class="w-full rounded-lg shadow-sm border border-gray-200 mt-2">`;
-                  chatHistory.push({ role: 'assistant', content: `（已为您生成编辑后的图片，请参考上图）` });
+                  chatHistory.push({ role: 'assistant', content: `[Image]` });
                   sanitizeChatHistoryInPlace();
                 }
               }
@@ -546,8 +714,8 @@
             if (requestDone) return;
             requestDone = true;
             window.removeEventListener('message', messageHandler);
-            assistantDiv.innerHTML = '<div class="text-red-600 text-sm">请求超时（90s），请检查网络后重试。</div>';
-            sendNotify('图生图请求超时', true);
+            assistantDiv.innerHTML = `<div class="text-red-600 text-sm">${t.reqTimeoutImage}</div>`;
+            sendNotify('Timeout', true);
             finishSendUi();
           }, 90000);
 
@@ -600,7 +768,7 @@
                   : null;
                 const assistantContent = normalizeAssistantContent(rawContent);
                 if (!assistantContent) {
-                  assistantDiv.innerHTML = '<div class="text-amber-700 text-sm">接口未返回有效内容，请稍后重试或检查模型与 Key。</div>';
+                  assistantDiv.innerHTML = `<div class="text-amber-700 text-sm">${t.errNoContent}</div>`;
                 } else {
                   assistantDiv.innerHTML = renderMarkdown(assistantContent);
                   chatHistory.push({ role: 'assistant', content: assistantContent });
@@ -610,10 +778,10 @@
                 const imageArr = msg.data && msg.data.images ? msg.data.images : (msg.data && msg.data.data ? msg.data.data : null);
                 const imageUrl = imageArr && imageArr[0] && imageArr[0].url ? imageArr[0].url : null;
                 if (!imageUrl) {
-                  assistantDiv.innerHTML = '<div class="text-amber-700 text-sm">生图失败或接口未返回图片 URL。请检查模型名称和额度。</div>';
+                  assistantDiv.innerHTML = `<div class="text-amber-700 text-sm">${t.errNoImageGen}</div>`;
                 } else {
                   assistantDiv.innerHTML = `<img src="${imageUrl}" alt="Generated Image" class="w-full rounded-lg shadow-sm border border-gray-200 mt-2">`;
-                  chatHistory.push({ role: 'assistant', content: `（已为您生成图片，请参考上图）` });
+                  chatHistory.push({ role: 'assistant', content: `[Image]` });
                   sanitizeChatHistoryInPlace();
                 }
               }
@@ -627,8 +795,8 @@
           if (requestDone) return;
           requestDone = true;
           window.removeEventListener('message', messageHandler);
-          assistantDiv.innerHTML = '<div class="text-red-600 text-sm">请求超时（90s），请检查网络后重试，或点刷新图标清空会话。</div>';
-          sendNotify('对话请求超时', true);
+          assistantDiv.innerHTML = `<div class="text-red-600 text-sm">${t.reqTimeoutChat}</div>`;
+          sendNotify('Timeout', true);
           finishSendUi();
         }, 90000);
 
@@ -636,9 +804,10 @@
 
         parent.postMessage({ pluginMessage: { type: 'networkRequest', url: apiUrl, body: requestBody, apiKey: apiKey } }, '*');
       } catch (err) {
+        const t = translations[currentLang];
         console.error('Plugin run error:', err);
-        showStatusBanner('插件异常：' + (err && err.message ? err.message : String(err)), 'error');
-        sendNotify('插件运行出错，请查看面板顶部红条', true);
+        showStatusBanner((currentLang === 'zh' ? '插件异常：' : 'Plugin Error: ') + (err && err.message ? err.message : String(err)), 'error');
+        sendNotify(currentLang === 'zh' ? '插件运行出错，请查看面板顶部红条' : 'Plugin error, see top red banner', true);
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>';
       }
